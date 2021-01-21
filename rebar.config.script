@@ -1,0 +1,40 @@
+%% behaviac是否debug模式
+BehaviacDebug = true,
+
+[
+    {erl_opts, [no_debug_info]},
+    {deps, []},
+    {plugins, [
+        {pc, ".*", {git, "https://github.com/DominicGame/port_compiler.git", {tag, "master"}}}
+    ]},
+    {provider_hooks, [
+        {pre, [
+            {compile, {pc, compile}},
+            {clean, {pc, clean}}
+        ]}
+    ]},
+
+    {port_specs, [
+        {"priv/behaviac_enif.so", [
+            "c_src/behaviac/behaviac_enif.cpp",
+            "c_src/behaviac/src/*/*.cpp",
+            "c_src/behaviac/src/*/*/*.cpp",
+            "c_src/behaviac/src/*/*/*/*.cpp",
+            "c_src/behaviac/behaviac_generated/*/*.cpp",
+            "c_src/behaviac/behaviac_generated/*/*/*.cpp"
+        ]}
+    ]},
+
+    case BehaviacDebug of
+        true ->
+            {port_env, [
+                {"CXXFLAGS", "-I\"c_src/behaviac\" /DBEHAVIAC_RELEASE_CUSTOMIZED"},
+                 {"win32", "LDFLAGS", "shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib"}
+            ]};
+        false ->
+            {port_env, [
+                {"CXXFLAGS", "-I\"c_src/behaviac\""},
+                {"win32", "LDFLAGS", "shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib"}
+            ]}
+    end
+].
